@@ -4,7 +4,15 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  after_commit :async_update # Run on create & update
+
   def admin?
     admin
+  end
+
+  private
+
+  def async_update
+    UpdateUserJob.perform_later(self)
   end
 end
